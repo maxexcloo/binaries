@@ -1,0 +1,24 @@
+name: Build ctrtool
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        repository: "3DSGuy/Project_CTR"
+
+    - name: Make dependencies
+      run: make deps
+      working-directory: ./ctrtool
+
+    - name: Make
+      run: make
+      working-directory: ./ctrtool
