@@ -18,10 +18,10 @@ jobs:
           sudo apt update -y
           sudo apt install -y liblz4-dev libuv1-dev pkgconf zlib1g-dev
       - run: make
+      - run: cp maxcso maxcso-linux_amd64
       - uses: actions/upload-artifact@v4
         with:
-          name: maxcso-linux_amd64
-          path: maxcso
+          path: maxcso-linux_amd64
 
   build-linux-arm:
     runs-on: ubuntu-latest
@@ -47,8 +47,7 @@ jobs:
             mkdir -p "${PWD}/artifacts"
       - uses: actions/upload-artifact@v4
         with:
-          name: maxcso-linux_aarch64
-          path: artifacts/*
+          path: artifacts/maxcso-linux_aarch64
 
   build-macos:
     runs-on: ${{ matrix.runs-on }}
@@ -61,10 +60,10 @@ jobs:
           brew install libdeflate libuv lz4 pkg-config
       - run: sed -i "" -e "s|uv.h|$(brew --prefix libuv)/include/uv.h|" src/buffer_pool.h
       - run: make
+      - run: cp maxcso maxcso-macos-${{ matrix.arch }}
       - uses: actions/upload-artifact@v4
         with:
-          name: maxcso-macos-${{ matrix.arch }}
-          path: maxcso
+          path: maxcso-macos-${{ matrix.arch }}
     strategy:
       matrix:
         include:
@@ -83,10 +82,10 @@ jobs:
       - run: '"%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\setup.exe" modify --quiet --productId Microsoft.VisualStudio.Product.Enterprise --channelId VisualStudio.17.Release --add Microsoft.VisualStudio.Component.WinXP'
       - run: msbuild cli/maxcso.sln /p:configuration=Release /p:platform=${{ matrix.platform }} /t:rebuild
       - run: tree /f /a
+      - run: cp maxcso/build/visualstudio/${{ matrix.platform == 'x64' && 'x64/' || '' }}Release/maxcso.exe maxcso-win_${{ matrix.arch }}.exe
       - uses: actions/upload-artifact@v4
         with:
-          name: maxcso-win_${{ matrix.arch }}.exe
-          path: maxcso/build/visualstudio/${{ matrix.platform == 'x64' && 'x64/' || '' }}Release/maxcso.exe
+          path: maxcso-win_${{ matrix.arch }}.exe
     strategy:
       matrix:
         include:
@@ -109,6 +108,7 @@ jobs:
           persist-credentials: false
       - uses: actions/download-artifact@v4
         with:
+          merge-multiple: true
           path: maxcso
       - run: |
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
