@@ -88,7 +88,7 @@ jobs:
         with:
           repository: "3DSGuy/Project_CTR"
       - uses: microsoft/setup-msbuild@v2
-      - run: msbuild ctrtool/build/visualstudio/CTRTool.sln /p:configuration=Release /p:platform=${{ matrix.platform }} /t:rebuild
+      - run: msbuild ctrtool/build/visualstudio/CTRTool.sln /p:configuration=Release /p:platform=${{ matrix.platform }}
       - run: cp ctrtool/build/visualstudio/${{ matrix.platform == 'x64' && 'x64/' || '' }}Release/CTRTool.exe ctrtool-win_${{ matrix.platform }}.exe
       - uses: actions/upload-artifact@v4
         with:
