@@ -97,14 +97,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
       - uses: actions/download-artifact@v4
         with:
           path: ctrtool
       - run: |
-          git config user.email "${{ vars.GITHUB_REPOSITORY_OWNER }}"
-          git config user.name "${{ vars.GITHUB_REPOSITORY_OWNER }}"
-          git remote add gh "https://${{ github.token }}@github.com/${{ vars.GITHUB_REPOSITORY }}.git"
-          git fetch gh
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
           git add --all .
           git commit -m "Built ctrtool"
-          git push gh main
+      - uses: ad-m/github-push-action@master
+        with:
+          branch: ${{ github.ref }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
