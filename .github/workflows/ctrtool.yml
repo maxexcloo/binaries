@@ -31,6 +31,10 @@ jobs:
           shell: /bin/sh
           dockerRunArgs: |
             -v "${PWD}/artifacts:/artifacts"
+          install: |
+            apt update -y
+            apt upgrade -y
+            apt install -y git
           run: |
             mkdir -p /build
             git clone https://github.com/3DSGuy/Project_CTR.git /build
