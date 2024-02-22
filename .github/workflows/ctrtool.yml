@@ -20,7 +20,7 @@ jobs:
         name: ctrtool-linux_amd64
         path: ctrtool/bin/ctrtool
 
-  build-linux-arm:
+  build-linux-armv7:
     runs-on: ubuntu-latest
     steps:
       - uses: uraimo/run-on-arch-action@v2
@@ -40,7 +40,7 @@ jobs:
             cd /build/ctrtool
             make deps
             make
-            cp bin/ctrtool /artifacts/ctrtool-linux_arm
+            cp bin/ctrtool /artifacts/ctrtool-linux_armv7
           setup: |
             mkdir -p "${PWD}/artifacts"
       - uses: actions/upload-artifact@v4
@@ -101,12 +101,16 @@ jobs:
         with:
           name: ctrtool-win_${{ matrix.platform }}.exe
           path: ctrtool/build/visualstudio/${{ matrix.platform == 'x64' && 'x64/' || '' }}Release/CTRTool.exe
-
     strategy:
       matrix:
         platform: [x86, x64]
 
   release:
+    needs:
+      - build-linux-amd64
+      - build-linux-armv7
+      - build-linux-arm64
+      - build-windows
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
