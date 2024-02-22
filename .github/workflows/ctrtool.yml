@@ -94,9 +94,9 @@ jobs:
         with:
           path: ctrtool
       - run: |
-          git config user.email "${{ secrets.GH_EMAIL }}"
-          git config user.name "${{ secrets.GH_USER }}"
-          git remote add gh "https://${{ secrets.GH_TOKEN}}@github.com/:user/:repo.git"
+          git config user.email "${{ vars.GITHUB_REPOSITORY_OWNER }}"
+          git config user.name "${{ vars.GITHUB_REPOSITORY_OWNER }}"
+          git remote add gh "https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ vars.GITHUB_REPOSITORY }}.git"
           git fetch gh
           git add --all .
           git commit -m "Built ctrtool"
