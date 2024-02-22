@@ -2,23 +2,26 @@ name: Build ctrtool
 
 on:
   push:
-    branches: ["main"]
+    branches: 
+      - main
+    paths:
+      - ".yml"
 
 jobs:
   build-linux-amd64:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-      with:
-        repository: "3DSGuy/Project_CTR"
-    - run: make deps
-      working-directory: ctrtool
-    - run: make
-      working-directory: ctrtool
-    - uses: actions/upload-artifact@v4
-      with:
-        name: ctrtool-linux_amd64
-        path: ctrtool/bin/ctrtool
+      - uses: actions/checkout@v4
+        with:
+          repository: "3DSGuy/Project_CTR"
+      - run: make deps
+        working-directory: ctrtool
+      - run: make
+        working-directory: ctrtool
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ctrtool-linux_amd64
+          path: ctrtool/bin/ctrtool
 
   build-linux-armv7:
     runs-on: ubuntu-latest
@@ -105,7 +108,7 @@ jobs:
       matrix:
         platform: [x86, x64]
 
-  release:
+  push:
     needs:
       - build-linux-amd64
       - build-linux-armv7
@@ -113,9 +116,15 @@ jobs:
       - build-windows
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
-      - if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v1
         with:
-          files: |
-            *
+          path: ctrtool
+      - run: |
+          git config user.email "${{ secrets.GH_MAIL }}"
+          git config user.name "${{ secrets.GH_USER }}"
+          git remote add gh "https://${{ secrets.GH_TOKEN}}@github.com/:user/:repo.git"
+          git fetch gh
+          git add --all .
+          git commit -m "Built ctrtool"
+          git push gh main
