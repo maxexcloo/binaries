@@ -89,13 +89,15 @@ jobs:
       - run: tree /f /a
       - uses: actions/upload-artifact@v4
         with:
-          name: maxcso-win_${{ matrix.platform }}.exe
+          name: maxcso-win_${{ matrix.arch }}.exe
           path: maxcso/build/visualstudio/${{ matrix.platform == 'x64' && 'x64/' || '' }}Release/maxcso.exe
     strategy:
       matrix:
-        platform:
-          - x64
-          - x86
+        include:
+          - arch: x64
+            platform: x64
+          - arch: x86
+            platform: Win32
 
   push:
     needs:
