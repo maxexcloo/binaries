@@ -50,7 +50,7 @@ jobs:
             mkdir -p "${PWD}/artifacts"
       - uses: actions/upload-artifact@v4
         with:
-          name: artifacts/ctrtool-linux_${{ matrix.arch }}
+          name: ctrtool-linux_${{ matrix.arch }}
           path: artifacts/ctrtool-linux_${{ matrix.arch }}
     strategy:
       matrix:
