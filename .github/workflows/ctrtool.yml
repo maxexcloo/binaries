@@ -33,7 +33,6 @@ jobs:
             -v "${PWD}/artifacts:/artifacts"
           install: |
             apt update -y
-            apt upgrade -y
             apt install -y build-essential git
           run: |
             mkdir -p /build
@@ -61,7 +60,6 @@ jobs:
             -v "${PWD}/artifacts:/artifacts"
           install: |
             apt update -y
-            apt upgrade -y
             apt install -y build-essential git
           run: |
             mkdir -p /build
@@ -99,11 +97,11 @@ jobs:
           repository: "3DSGuy/Project_CTR"
       - uses: microsoft/setup-msbuild@v2
       - run: msbuild ctrtool/build/visualstudio/CTRTool.sln /p:configuration=Release /p:platform=${{ matrix.platform }} /t:rebuild
-      - run: tree /f /a
       - uses: actions/upload-artifact@v4
         with:
-          name: ctrtool-win_${{ matrix.platform }}
-          path: ./ctrtool/bin/ctrtool
+          name: ctrtool-win_${{ matrix.platform }}.exe
+          path: ./ctrtool/build/visualstudio/Release/CTRTool.exe
+
     strategy:
       matrix:
         platform: [x86, x64]
