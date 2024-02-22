@@ -98,12 +98,11 @@ jobs:
         with:
           repository: "3DSGuy/Project_CTR"
       - uses: microsoft/setup-msbuild@v2
-      - name: Build
-        run: msbuild ./ctrtool/build/visualstudio/CTRTool.sln /p:configuration=Release /p:platform=${{ matrix.platform }} /t:rebuild
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
+      - run: msbuild ctrtool/build/visualstudio/CTRTool.sln /p:configuration=Release /p:platform=${{ matrix.platform }} /t:rebuild
+      - run: tree /f /a
+      - uses: actions/upload-artifact@v4
         with:
-          name: ctrtool
+          name: ctrtool-win_${{ matrix.platform }}
           path: ./ctrtool/bin/ctrtool
     strategy:
       matrix:
