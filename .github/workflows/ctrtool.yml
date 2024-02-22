@@ -21,6 +21,7 @@ jobs:
       - run: cp ctrtool/bin/ctrtool ctrtool-linux_amd64
       - uses: actions/upload-artifact@v4
         with:
+          name: ctrtool-linux_amd64
           path: ctrtool-linux_amd64
 
   build-linux-arm:
@@ -48,6 +49,7 @@ jobs:
             mkdir -p "${PWD}/artifacts"
       - uses: actions/upload-artifact@v4
         with:
+          name: artifacts/ctrtool-linux_${{ matrix.arch }}
           path: artifacts/ctrtool-linux_${{ matrix.arch }}
     strategy:
       matrix:
@@ -68,6 +70,7 @@ jobs:
       - run: cp ctrtool/bin/ctrtool ctrtool-macos-${{ matrix.arch }}
       - uses: actions/upload-artifact@v4
         with:
+          name: ctrtool-macos-${{ matrix.arch }}
           path: ctrtool-macos-${{ matrix.arch }}
     strategy:
       matrix:
@@ -88,6 +91,7 @@ jobs:
       - run: cp ctrtool/build/visualstudio/${{ matrix.platform == 'x64' && 'x64/' || '' }}Release/CTRTool.exe ctrtool-win_${{ matrix.platform }}.exe
       - uses: actions/upload-artifact@v4
         with:
+          name: ctrtool-win_${{ matrix.platform }}.exe
           path: ctrtool-win_${{ matrix.platform }}.exe
     strategy:
       matrix:
