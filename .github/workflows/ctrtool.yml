@@ -51,7 +51,7 @@ jobs:
           path: artifacts/*
 
   build-macos:
-    runs-on: macos-latest
+    runs-on: ${{ matrix.runs-on }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -62,8 +62,15 @@ jobs:
         working-directory: ctrtool
       - uses: actions/upload-artifact@v4
         with:
-          name: ctrtool-macos
+          name: ctrtool-macos-${{ matrix.arch }}
           path: ctrtool/bin/ctrtool
+    strategy:
+      matrix:
+        include:
+          - arch: arm64
+            runs-on: flyci-macos-large-latest-m2
+          - arch: x86_64
+            runs-on: macos-latest
 
   build-windows:
     runs-on: windows-latest
@@ -96,7 +103,7 @@ jobs:
       - run: |
           git config user.email "${{ vars.GITHUB_REPOSITORY_OWNER }}"
           git config user.name "${{ vars.GITHUB_REPOSITORY_OWNER }}"
-          git remote add gh "https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ vars.GITHUB_REPOSITORY }}.git"
+          git remote add gh "https://${{ github.token }}@github.com/${{ vars.GITHUB_REPOSITORY }}.git"
           git fetch gh
           git add --all .
           git commit -m "Built ctrtool"
