@@ -23,33 +23,6 @@ jobs:
           name: ctrtool-linux_amd64
           path: ctrtool/bin/ctrtool
 
-  build-linux-armv7:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: uraimo/run-on-arch-action@v2
-        with:
-          arch: armv7
-          distro: ubuntu_latest
-          githubToken: ${{ github.token }}
-          shell: /bin/sh
-          dockerRunArgs: |
-            -v "${PWD}/artifacts:/artifacts"
-          install: |
-            apt update -y
-            apt install -y build-essential git
-          run: |
-            mkdir -p /build
-            git clone https://github.com/3DSGuy/Project_CTR.git /build
-            cd /build/ctrtool
-            make deps
-            make
-            cp bin/ctrtool /artifacts/ctrtool-linux_armv7
-          setup: |
-            mkdir -p "${PWD}/artifacts"
-      - uses: actions/upload-artifact@v4
-        with:
-          path: artifacts/*
-
   build-linux-arm64:
     runs-on: ubuntu-latest
     steps:
@@ -89,7 +62,7 @@ jobs:
         working-directory: ctrtool
       - uses: actions/upload-artifact@v4
         with:
-          name: ctrtool
+          name: ctrtool-darwin
           path: ctrtool/bin/ctrtool
 
   build-windows:
@@ -111,7 +84,6 @@ jobs:
   push:
     needs:
       - build-linux-amd64
-      - build-linux-armv7
       - build-linux-arm64
       - build-windows
     runs-on: ubuntu-latest
