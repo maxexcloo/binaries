@@ -2,66 +2,76 @@ name: Build ctrtool
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   build-linux:
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v4
-      with:
-        repository: "3DSGuy/Project_CTR"
-    - uses: docker/setup-qemu-action@v3
-    - uses: docker/setup-buildx-action@v3
-    - run: |
-        sudo apt-get update
-        sudo apt-get install -y g++-${{ matrix.arch }}-linux-gnu gcc-${{ matrix.arch }}-linux-gnu
-    - run: make deps
-      working-directory: ./ctrtool
-    - run: make CC=${{ matrix.arch }}-linux-gnu-gcc CXX=${{ matrix.arch }}-linux-gnu-g++
-      working-directory: ./ctrtool
-    - uses: actions/upload-artifact@v4
-      with:
-        name: ctrtool-${{ matrix.arch }}
-        path: ./ctrtool/bin/ctrtool
-
+      - uses: actions/checkout@v4
+      - uses: uraimo/run-on-arch-action@v2
+        with:
+          arch: ${{ matrix.arch }}
+          distro: ${{ matrix.distro }}
+          githubToken: ${{ github.token }}
+          shell: /bin/sh
+          dockerRunArgs: |
+            -v "${PWD}/artifacts:/artifacts"
+          env: |
+            ARTIFACT_NAME: ctrtool-linux_${{ matrix.arch }}
+          install: |
+            apt-get update -y
+            apt-get upgrade -y
+            apt-get install -y build-essential git
+          run: |
+            mkdir -p /build
+            git clone https://github.com/3DSGuy/Project_CTR.git /build
+            cd /build/ctrtool
+            make deps
+            make
+            cp bin/ctrtool /artifacts/${ARTIFACT_NAME}
+          setup: |
+            mkdir -p "${PWD}/artifacts"
+      - run: |
+          ls -al "${PWD}/artifacts"
+      - uses: actions/upload-artifact@v4
+        with:
+          path: artifacts
     strategy:
       matrix:
-        arch: [amd64, i386, arm64]
+        include:
+          - arch: aarch64
+            distro: ubuntu:jammy
 
   build-macos:
     runs-on: ubuntu-macos
-
     steps:
-    - uses: actions/checkout@v4
-      with:
-        repository: "3DSGuy/Project_CTR"
-    - run: make deps
-      working-directory: ./ctrtool
-    - run: make
-      working-directory: ./ctrtool
-    - uses: actions/upload-artifact@v4
-      with:
-        name: ctrtool
-        path: ./ctrtool/bin/ctrtool
+      - uses: actions/checkout@v4
+        with:
+          repository: "3DSGuy/Project_CTR"
+      - run: make deps
+        working-directory: ./ctrtool
+      - run: make
+        working-directory: ./ctrtool
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ctrtool
+          path: ./ctrtool/bin/ctrtool
 
   build-windows:
     runs-on: windows-latest
-
     steps:
-    - uses: actions/checkout@v4
-      with:
-        repository: "3DSGuy/Project_CTR"
-    - uses: microsoft/setup-msbuild@v2
-    - name: Build
-      run: msbuild ./ctrtool/build/visualstudio/CTRTool.sln /p:configuration=Release /p:platform=${{ matrix.platform }} /t:rebuild
-    - name: Upload build artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: ctrtool
-        path: ./ctrtool/bin/ctrtool
-
+      - uses: actions/checkout@v4
+        with:
+          repository: "3DSGuy/Project_CTR"
+      - uses: microsoft/setup-msbuild@v2
+      - name: Build
+        run: msbuild ./ctrtool/build/visualstudio/CTRTool.sln /p:configuration=Release /p:platform=${{ matrix.platform }} /t:rebuild
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ctrtool
+          path: ./ctrtool/bin/ctrtool
     strategy:
       matrix:
         platform: [x86, x64]
