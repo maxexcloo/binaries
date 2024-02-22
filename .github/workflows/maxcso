@@ -1,0 +1,123 @@
+name: Build maxcso
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/*.yml"
+
+jobs:
+  build-linux-amd64:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: "unknownbrackets/maxcso"
+      - run: |
+        sudo apt update -y
+        sudo apt install -y liblz4-dev libuv1-dev pkgconf zlib1g-dev
+      - run: make
+      - uses: actions/upload-artifact@v4
+        with:
+          name: maxcso-linux_amd64
+          path: maxcso
+
+  build-linux-arm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: uraimo/run-on-arch-action@v2
+        with:
+          arch: ${{ matrix.arch }}
+          distro: ubuntu_latest
+          githubToken: ${{ github.token }}
+          shell: /bin/sh
+          dockerRunArgs: |
+            -v "${PWD}/artifacts:/artifacts"
+          install: |
+            apt update -y
+            apt install -y build-essential git liblz4-dev libuv1-dev pkgconf zlib1g-dev
+          run: |
+            mkdir -p /build
+            git clone https://github.com/unknownbrackets/maxcso.git /build
+            cd /build
+            make
+            cp maxcso /artifacts/maxcso-linux_${{ matrix.arch }}
+          setup: |
+            mkdir -p "${PWD}/artifacts"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: maxcso-linux_${{ matrix.arch }}
+          path: artifacts/*
+    strategy:
+      matrix:
+        arch:
+          - aarch64
+          - armv7
+
+  build-macos:
+    runs-on: ${{ matrix.runs-on }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: "unknownbrackets/maxcso"
+      - run: |
+        sudo brew update
+        sudo brew install libdeflate libuv lz4 pkg-config
+      - run: sed -i "" -e "s/uv.h/\/opt\/homebrew\/Cellar\/libuv\/1.48.0\/include\/uv.h/" src/buffer_pool.h
+      - run: make
+      - uses: actions/upload-artifact@v4
+        with:
+          name: maxcso-macos-${{ matrix.arch }}
+          path: maxcso
+    strategy:
+      matrix:
+        include:
+          - arch: arm64
+            runs-on: flyci-macos-large-latest-m2
+          - arch: x86_64
+            runs-on: macos-latest
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: "unknownbrackets/maxcso"
+      - uses: microsoft/setup-msbuild@v2
+      - run: msbuild cli/maxcso.sln /p:configuration=Release /p:platform=${{ matrix.platform }} /t:rebuild
+      - run: tree /f /a
+      - uses: actions/upload-artifact@v4
+        with:
+          name: maxcso-win_${{ matrix.platform }}.exe
+          path: maxcso/build/visualstudio/${{ matrix.platform == 'x64' && 'x64/' || '' }}Release/maxcso.exe
+    strategy:
+      matrix:
+        platform:
+          - x64
+          - x86
+
+  push:
+    needs:
+      - build-linux-amd64
+      - build-linux-arm
+      - build-macos
+      - build-windows
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          path: maxcso
+      - run: |
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add --all .
+          git commit -m "Built maxcso"
+      - uses: ad-m/github-push-action@v0.8.0
+        with:
+          branch: ${{ github.ref }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
