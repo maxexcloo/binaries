@@ -8,7 +8,22 @@ on:
       - ".github/workflows/*.yml"
 
 jobs:
-  build-linux:
+  build-linux-amd64:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: "3DSGuy/Project_CTR"
+      - run: make deps
+        working-directory: ctrtool
+      - run: make
+        working-directory: ctrtool
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ctrtool-linux_amd64
+          path: ctrtool/bin/ctrtool
+
+  build-linux-arm:
     runs-on: ubuntu-latest
     steps:
       - uses: uraimo/run-on-arch-action@v2
@@ -40,21 +55,6 @@ jobs:
         arch:
           - aarch64
           - armv7
-
-  build-linux-amd64:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          repository: "3DSGuy/Project_CTR"
-      - run: make deps
-        working-directory: ctrtool
-      - run: make
-        working-directory: ctrtool
-      - uses: actions/upload-artifact@v4
-        with:
-          name: ctrtool-linux_amd64
-          path: ctrtool/bin/ctrtool
 
   build-macos:
     runs-on: ${{ matrix.runs-on }}
@@ -99,7 +99,7 @@ jobs:
   push:
     needs:
       - build-linux-amd64
-      - build-linux-arm64
+      - build-linux-arm
       - build-macos
       - build-windows
     runs-on: ubuntu-latest
