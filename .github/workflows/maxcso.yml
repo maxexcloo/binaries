@@ -15,8 +15,8 @@ jobs:
         with:
           repository: "unknownbrackets/maxcso"
       - run: |
-        sudo apt update -y
-        sudo apt install -y liblz4-dev libuv1-dev pkgconf zlib1g-dev
+          sudo apt update -y
+          sudo apt install -y liblz4-dev libuv1-dev pkgconf zlib1g-dev
       - run: make
       - uses: actions/upload-artifact@v4
         with:
@@ -62,8 +62,8 @@ jobs:
         with:
           repository: "unknownbrackets/maxcso"
       - run: |
-        sudo brew update
-        sudo brew install libdeflate libuv lz4 pkg-config
+          sudo brew update
+          sudo brew install libdeflate libuv lz4 pkg-config
       - run: sed -i "" -e "s/uv.h/\/opt\/homebrew\/Cellar\/libuv\/1.48.0\/include\/uv.h/" src/buffer_pool.h
       - run: make
       - uses: actions/upload-artifact@v4
