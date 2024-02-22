@@ -82,7 +82,6 @@ jobs:
         with:
           repository: "unknownbrackets/maxcso"
       - uses: microsoft/setup-msbuild@v2
-      - run: '"%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\setup.exe" modify --quiet --productId Microsoft.VisualStudio.Product.Enterprise --channelId VisualStudio.17.Release --add Microsoft.VisualStudio.Component.WinXP'
       - run: msbuild cli/maxcso.sln /p:configuration=Release /p:platform=${{ matrix.platform }} /t:rebuild
       - run: tree /f /a
       - run: cp maxcso/build/visualstudio/${{ matrix.platform == 'x64' && 'x64/' || '' }}Release/maxcso.exe maxcso-win_${{ matrix.arch }}.exe
