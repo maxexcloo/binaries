@@ -28,7 +28,7 @@ jobs:
     steps:
       - uses: uraimo/run-on-arch-action@v2
         with:
-          arch: ${{ matrix.arch }}
+          arch: aarch64
           distro: ubuntu_latest
           githubToken: ${{ github.token }}
           shell: /bin/sh
@@ -42,18 +42,13 @@ jobs:
             git clone https://github.com/unknownbrackets/maxcso.git /build
             cd /build
             make
-            cp maxcso /artifacts/maxcso-linux_${{ matrix.arch }}
+            cp maxcso /artifacts/maxcso-linux_aarch64
           setup: |
             mkdir -p "${PWD}/artifacts"
       - uses: actions/upload-artifact@v4
         with:
-          name: maxcso-linux_${{ matrix.arch }}
+          name: maxcso-linux_aarch64
           path: artifacts/*
-    strategy:
-      matrix:
-        arch:
-          - aarch64
-          - armv7
 
   build-macos:
     runs-on: ${{ matrix.runs-on }}
@@ -85,6 +80,7 @@ jobs:
         with:
           repository: "unknownbrackets/maxcso"
       - uses: microsoft/setup-msbuild@v2
+      - run: '"%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\setup.exe" modify --quiet --productId Microsoft.VisualStudio.Product.Enterprise --channelId VisualStudio.17.Release --add Microsoft.VisualStudio.Component.WinXP'
       - run: msbuild cli/maxcso.sln /p:configuration=Release /p:platform=${{ matrix.platform }} /t:rebuild
       - run: tree /f /a
       - uses: actions/upload-artifact@v4
