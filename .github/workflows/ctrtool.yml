@@ -5,7 +5,7 @@ on:
     branches: ["main"]
 
 jobs:
-  build-linux-amd64:
+  build-linux-x64:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -17,8 +17,36 @@ jobs:
       working-directory: ctrtool
     - uses: actions/upload-artifact@v4
       with:
-        name: ctrtool-linux_amd64
+        name: ctrtool-linux_x64
         path: ctrtool/bin/ctrtool
+
+  build-linux-arm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: uraimo/run-on-arch-action@v2
+        with:
+          arch: armv7
+          distro: ubuntu_latest
+          githubToken: ${{ github.token }}
+          shell: /bin/sh
+          dockerRunArgs: |
+            -v "${PWD}/artifacts:/artifacts"
+          install: |
+            apt update -y
+            apt upgrade -y
+            apt install -y build-essential git
+          run: |
+            mkdir -p /build
+            git clone https://github.com/3DSGuy/Project_CTR.git /build
+            cd /build/ctrtool
+            make deps
+            make
+            cp bin/ctrtool /artifacts/ctrtool-linux_arm
+          setup: |
+            mkdir -p "${PWD}/artifacts"
+      - uses: actions/upload-artifact@v4
+        with:
+          path: artifacts/ctrtool-linux_arm
 
   build-linux-arm64:
     runs-on: ubuntu-latest
@@ -34,7 +62,7 @@ jobs:
           install: |
             apt update -y
             apt upgrade -y
-            apt install -y git
+            apt install -y build-essential git
           run: |
             mkdir -p /build
             git clone https://github.com/3DSGuy/Project_CTR.git /build
