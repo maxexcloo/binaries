@@ -64,7 +64,7 @@ jobs:
       - run: |
           brew update
           brew install libdeflate libuv lz4 pkg-config
-      - run: sed -i "" -e "s/uv.h/\/opt\/homebrew\/Cellar\/libuv\/1.48.0\/include\/uv.h/" src/buffer_pool.h
+      - run: sed -i "" -e "s|uv.h|$(brew --prefix libuv)/include/uv.h|" src/buffer_pool.h
       - run: make
       - uses: actions/upload-artifact@v4
         with:
