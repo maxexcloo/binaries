@@ -5,7 +5,7 @@ on:
     branches: 
       - main
     paths:
-      - ".yml"
+      - .github
 
 jobs:
   build-linux-amd64:
