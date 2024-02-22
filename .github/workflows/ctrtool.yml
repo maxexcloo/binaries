@@ -8,27 +8,12 @@ on:
       - ".github/workflows/*.yml"
 
 jobs:
-  build-linux-amd64:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          repository: "3DSGuy/Project_CTR"
-      - run: make deps
-        working-directory: ctrtool
-      - run: make
-        working-directory: ctrtool
-      - uses: actions/upload-artifact@v4
-        with:
-          name: ctrtool-linux_amd64
-          path: ctrtool/bin/ctrtool
-
-  build-linux-arm64:
+  build-linux:
     runs-on: ubuntu-latest
     steps:
       - uses: uraimo/run-on-arch-action@v2
         with:
-          arch: aarch64
+          arch: ${{ matrix.arch }}
           distro: ubuntu_latest
           githubToken: ${{ github.token }}
           shell: /bin/sh
@@ -43,12 +28,33 @@ jobs:
             cd /build/ctrtool
             make deps
             make
-            cp bin/ctrtool /artifacts/ctrtool-linux_arm64
+            cp bin/ctrtool /artifacts/ctrtool-linux_${{ matrix.arch }}
           setup: |
             mkdir -p "${PWD}/artifacts"
       - uses: actions/upload-artifact@v4
         with:
+          name: ctrtool-linux_${{ matrix.arch }}
           path: artifacts/*
+    strategy:
+      matrix:
+        arch:
+          - aarch64
+          - armv7
+
+  build-linux-amd64:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: "3DSGuy/Project_CTR"
+      - run: make deps
+        working-directory: ctrtool
+      - run: make
+        working-directory: ctrtool
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ctrtool-linux_amd64
+          path: ctrtool/bin/ctrtool
 
   build-macos:
     runs-on: ${{ matrix.runs-on }}
@@ -86,7 +92,9 @@ jobs:
           path: ctrtool/build/visualstudio/${{ matrix.platform == 'x64' && 'x64/' || '' }}Release/CTRTool.exe
     strategy:
       matrix:
-        platform: [x86, x64]
+        platform:
+          - x64
+          - x86
 
   push:
     needs:
