@@ -100,7 +100,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: ctrtool-win_${{ matrix.platform }}.exe
-          path: ./ctrtool/build/visualstudio/Release/CTRTool.exe
+          path: ./ctrtool/build/visualstudio/Release/${{ matrix.platform == 'x64' && 'x64/' }}CTRTool.exe
 
     strategy:
       matrix:
