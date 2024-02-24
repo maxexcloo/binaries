@@ -18,7 +18,7 @@ jobs:
       - run: |
           sudo apt update -y
           sudo apt install -y liblz4-dev libuv1-dev pkgconf zlib1g-dev
-      - run: make CFLAGS="-O2 -static"
+      - run: make
       - run: cp maxcso maxcso-linux_amd64
       - uses: actions/upload-artifact@v4
         with:
@@ -43,7 +43,7 @@ jobs:
             mkdir -p /build
             git clone https://github.com/unknownbrackets/maxcso.git /build
             cd /build
-            make CFLAGS="-O2 -static"
+            make
             cp maxcso /artifacts/maxcso-linux_aarch64
           setup: |
             mkdir -p "${PWD}/artifacts"
@@ -62,7 +62,7 @@ jobs:
           brew update
           brew install libdeflate libuv lz4 pkg-config
       - run: sed -i "" -e "s|uv.h|$(brew --prefix libuv)/include/uv.h|" src/buffer_pool.h
-      - run: make CFLAGS="-O2 -static"
+      - run: make
       - run: cp maxcso maxcso-macos-${{ matrix.arch }}
       - uses: actions/upload-artifact@v4
         with:
