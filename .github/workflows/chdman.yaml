@@ -1,0 +1,122 @@
+name: Build chdman
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/chdman.yml"
+
+jobs:
+  build-linux-amd64:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: "mamedev/mame"
+      - run: make SUBTARGET=tiny
+      - run: cp chdman/bin/chdman chdman-linux_amd64
+      - uses: actions/upload-artifact@v4
+        with:
+          name: chdman-linux_amd64
+          path: chdman-linux_amd64
+
+  build-linux-arm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: uraimo/run-on-arch-action@v2
+        with:
+          arch: ${{ matrix.arch }}
+          distro: ubuntu_latest
+          githubToken: ${{ github.token }}
+          shell: /bin/sh
+          dockerRunArgs: |
+            -v "${PWD}/artifacts:/artifacts"
+          install: |
+            apt update -y
+            apt install -y build-essential git
+          run: |
+            mkdir -p /build
+            git clone https://github.com/mamedev/mame.git /build
+            cd /build
+            make SUBTARGET=tiny
+            cp bin/chdman /artifacts/chdman-linux_${{ matrix.arch }}
+          setup: |
+            mkdir -p "${PWD}/artifacts"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: chdman-linux_${{ matrix.arch }}
+          path: artifacts/chdman-linux_${{ matrix.arch }}
+    strategy:
+      matrix:
+        arch:
+          - aarch64
+          - armv7
+
+  build-macos:
+    runs-on: ${{ matrix.runs-on }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: "mamedev/mame"
+      - run: make SUBTARGET=tiny
+      - run: cp chdman/bin/chdman chdman-macos-${{ matrix.arch }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: chdman-macos-${{ matrix.arch }}
+          path: chdman-macos-${{ matrix.arch }}
+    strategy:
+      matrix:
+        include:
+          - arch: arm64
+            runs-on: flyci-macos-large-latest-m2
+          - arch: x86_64
+            runs-on: macos-latest
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: "mamedev/mame"
+      - uses: microsoft/setup-msbuild@v2
+      - run: make vs2019 MSBUILD=1 SUBTARGET=tiny
+      - run: cp chdman/build/visualstudio/${{ matrix.platform == 'x64' && 'x64/' || '' }}Release/chdman.exe chdman-win_${{ matrix.platform }}.exe
+      - uses: actions/upload-artifact@v4
+        with:
+          name: chdman-win_${{ matrix.platform }}.exe
+          path: chdman-win_${{ matrix.platform }}.exe
+    strategy:
+      matrix:
+        platform:
+          - x64
+          - x86
+
+  push:
+    needs:
+      - build-linux-amd64
+      - build-linux-arm
+      - build-macos
+      - build-windows
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - run: |
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git pull
+      - uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+          path: chdman
+      - run: |
+          git add --all .
+          git commit -m "Built chdman"
+      - uses: ad-m/github-push-action@v0.8.0
+        with:
+          branch: ${{ github.ref }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
