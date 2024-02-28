@@ -18,6 +18,7 @@ jobs:
       - run: sudo apt update -y
       - run: sudo apt install -y build-essential git libfontconfig-dev libpulse-dev libsdl2-dev libsdl2-ttf-dev python3 qt5-qmake qtbase5-dev qtbase5-dev-tools qtchooser
       - run: make EMULATOR=0 TOOLS=1
+      - run: tree
       - run: cp chdman/bin/chdman chdman-linux_amd64
       - uses: actions/upload-artifact@v4
         with:
@@ -43,6 +44,7 @@ jobs:
             git clone https://github.com/mamedev/mame.git /build
             cd /build
             make EMULATOR=0 TOOLS=1
+            tree
             cp bin/chdman /artifacts/chdman-linux_${{ matrix.arch }}
           setup: |
             mkdir -p "${PWD}/artifacts"
@@ -63,6 +65,7 @@ jobs:
         with:
           repository: "mamedev/mame"
       - run: make EMULATOR=0 TOOLS=1
+      - run: tree
       - run: cp chdman/bin/chdman chdman-macos-${{ matrix.arch }}
       - uses: actions/upload-artifact@v4
         with:
@@ -84,6 +87,7 @@ jobs:
           repository: "mamedev/mame"
       - uses: microsoft/setup-msbuild@v2
       - run: make vs2019 EMULATOR=0 MSBUILD=1 TOOLS=1
+      - run: tree /f /a
       - run: cp chdman/build/visualstudio/${{ matrix.platform == 'x64' && 'x64/' || '' }}Release/chdman.exe chdman-win_${{ matrix.platform }}.exe
       - uses: actions/upload-artifact@v4
         with:
