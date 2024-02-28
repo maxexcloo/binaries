@@ -64,9 +64,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: "mamedev/mame"
-      - run: brew install sdl2
-      - run: make EMULATOR=0 TOOLS=1
-      - run: tree
+      - run: brew install rom-tools
+      - run: tree $HOMEBREW_PREFIX/opt/rom-tools
       - run: cp chdman/bin/chdman chdman-macos-${{ matrix.arch }}
       - uses: actions/upload-artifact@v4
         with:
