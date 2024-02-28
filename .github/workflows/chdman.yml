@@ -19,7 +19,7 @@ jobs:
       - run: sudo apt install -y build-essential git libfontconfig-dev libpulse-dev libsdl2-dev libsdl2-ttf-dev python3 qt5-qmake qtbase5-dev qtbase5-dev-tools qtchooser
       - run: make EMULATOR=0 TOOLS=1
       - run: tree
-      - run: cp chdman/bin/chdman chdman-linux_amd64
+      - run: cp chdman chdman-linux_amd64
       - uses: actions/upload-artifact@v4
         with:
           name: chdman-linux_amd64
@@ -45,7 +45,7 @@ jobs:
             cd /build
             make EMULATOR=0 TOOLS=1
             tree
-            cp bin/chdman /artifacts/chdman-linux_${{ matrix.arch }}
+            cp chdman /artifacts/chdman-linux_${{ matrix.arch }}
           setup: |
             mkdir -p "${PWD}/artifacts"
       - uses: actions/upload-artifact@v4
@@ -64,7 +64,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: "mamedev/mame"
-      - run: brew install rom-tools
+      - run: brew install rom-tools tree
       - run: tree $HOMEBREW_PREFIX/opt/rom-tools
       - run: cp chdman/bin/chdman chdman-macos-${{ matrix.arch }}
       - uses: actions/upload-artifact@v4
